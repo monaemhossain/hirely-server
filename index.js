@@ -41,16 +41,16 @@ async function run() {
         const applicationCollections = client.db('applicationDB').collection('application');
 
         // auth api
-        app.post('/jwt', async(req, res) => {
+        app.post('/jwt', async (req, res) => {
             const user = req.body;
-            const token = jwt.sign(user, `${process.env.ACCESS_TOKEN_SECRET}`, {expiresIn: '1h'})
+            const token = jwt.sign(user, `${process.env.ACCESS_TOKEN_SECRET}`, { expiresIn: '1h' })
             console.log(user);
             res
-            .cookie('token', token, {
-                httpOnly: true,
-                secure: false,
-            })
-            .send({success: true})
+                .cookie('token', token, {
+                    httpOnly: true,
+                    secure: false,
+                })
+                .send({ success: true })
         })
 
         // Jobs Collection
@@ -99,6 +99,20 @@ async function run() {
             const result = await JobCollections.updateOne(filter, job, options);
             res.send(result);
         })
+        // update applicant number
+        app.put('/updateApplicant/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const updateJob = req.body;
+            const job = {
+                $set: {
+                    applicantsNumber: updateJob.applicantsNumber + 1
+                }
+            }
+            const result = await JobCollections.updateOne(filter, job);
+            res.send(result);
+        });
+
         // delete job item
         app.delete('/job/:id', async (req, res) => {
             const id = req.params.id
@@ -111,10 +125,12 @@ async function run() {
             const key = req.params.key.toLowerCase();
             const regex = new RegExp(key, 'i')
             const result = await JobCollections.find(
-                {$or: [
-                    { jobTitle: regex },
-                    { jobType: regex },
-                ]}
+                {
+                    $or: [
+                        { jobTitle: regex },
+                        { jobType: regex },
+                    ]
+                }
             ).toArray()
             res.send(result);
         });
@@ -147,10 +163,12 @@ async function run() {
             const key = req.params.key.toLowerCase();
             const regex = new RegExp(key, 'i')
             const result = await applicationCollections.find(
-                {$or: [
-                    { jobTitle: regex },
-                    { jobType: regex },
-                ]}
+                {
+                    $or: [
+                        { jobTitle: regex },
+                        { jobType: regex },
+                    ]
+                }
             ).toArray()
             console.log(result);
             res.send(result);
