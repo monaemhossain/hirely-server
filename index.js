@@ -99,19 +99,7 @@ async function run() {
             const result = await JobCollections.updateOne(filter, job, options);
             res.send(result);
         })
-        // update applicant number
-        app.put('/updateApplicant/:id', async (req, res) => {
-            const id = req.params.id;
-            const filter = { _id: new ObjectId(id) }
-            const updateJob = req.body;
-            const job = {
-                $set: {
-                    applicantsNumber: updateJob.applicantsNumber + 1
-                }
-            }
-            const result = await JobCollections.updateOne(filter, job);
-            res.send(result);
-        });
+        
 
         // delete job item
         app.delete('/job/:id', async (req, res) => {
