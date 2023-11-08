@@ -80,6 +80,16 @@ async function run() {
             const result = await JobCollections.updateOne(filter, job, options);
             res.send(result);
         })
+        // delete cart item
+        app.delete('/job/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await JobCollections.deleteOne(query)
+            res.send(result)
+        })
+
+
+
 
 
         // Job Application api
