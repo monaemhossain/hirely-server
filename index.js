@@ -17,7 +17,13 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-
+const verifyToken = async(req, res, next) => {
+    const token = req.cookies?.token
+    if(!token){
+        return res.status(401).send("unauthorized")
+    }
+    next()
+}
 
 
 
@@ -152,7 +158,7 @@ async function run() {
             res.send(result);
         })
         // Read Applications
-        app.get('/application', async (req, res) => {
+        app.get('/application', verifyToken , async (req, res) => {
             const cursor = applicationCollections.find();
             const result = await cursor.toArray();
             res.send(result);
