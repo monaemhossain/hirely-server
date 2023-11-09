@@ -11,7 +11,7 @@ const port = process.env.PORT || 5000;
 
 // middleware
 app.use(cors({
-    origin: ['https://hire-ly.web.app'],
+    origin: ['https://hire-ly.web.app', 'http://localhost:5173'],
     credentials: true
 }))
 app.use(express.json());
@@ -44,13 +44,19 @@ async function run() {
         app.post('/jwt', async (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, `${process.env.ACCESS_TOKEN_SECRET}`, { expiresIn: '1h' })
-            console.log(user);
             res
                 .cookie('token', token, {
                     httpOnly: true,
-                    secure: false,
+                    secure: true,
+                    sameSite: 'none',
+                    maxAge: 60 * 60 * 1000
                 })
                 .send({ success: true })
+        })
+        // jwt logout
+        app.post('/logout', async (req, res) => {
+            const user = req.body;
+            res.clearCookie('token', { maxAge: 0, secure: true, sameSite: 'none' })
         })
 
         // Jobs Collection
@@ -99,7 +105,19 @@ async function run() {
             const result = await JobCollections.updateOne(filter, job, options);
             res.send(result);
         })
-        
+
+
+        app.put('/job/update-applicant/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true }
+            const updateApplicant = req.body;
+            const job = {
+                $inc: { applicantsNumber: 1 }
+            }
+            const result = await JobCollections.updateOne(filter, job, options);
+            res.send(result);
+        })
 
         // delete job item
         app.delete('/job/:id', async (req, res) => {
